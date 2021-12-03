@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels: 
+    app: wordpress
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress  
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      volumes:
+        - name: aws-pv-mysql
+          persistentVolumeClaim:
+            claimName: aws-pvc-sc      
+      containers:
+      - image: mysql:latest
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysqlrootpassword
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: aws-pv-mysql
+          mountPath: /var/lib/mysql

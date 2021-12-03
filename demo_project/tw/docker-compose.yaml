@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_DATABASE: db
+      MYSQL_USER: pranav
+      MYSQL_PASSWORD: admin@123
+    networks:
+      - testnetwork
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - '8000:80'
+    restart: always
+    volumes:
+       - wp-data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: db
+      WORDPRESS_DB_USER: pranav
+      WORDPRESS_DB_PASSWORD: admin@123
+    networks:
+      - testnetwork
+networks:
+  testnetwork:
+volumes:
+  db_data:
+  wp-data:
