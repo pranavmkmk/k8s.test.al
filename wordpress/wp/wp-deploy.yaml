@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress1
+  labels: 
+    app: wordpress1
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress1
+  template:
+    metadata:
+      labels:
+        app: wordpress1
+    spec:
+      volumes:
+        - name: aws-pv-wp1
+          persistentVolumeClaim:
+            claimName: task-pv-claim-wp      
+      containers:
+      - image: wordpress:latest
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_NAME
+          value: db
+        - name: WORDPRESS_DB_USER
+          value: pranav
+        - name: WORDPRESS_DB_PASSWORD
+          value: admin@123
+        ports:
+        - containerPort: 80
+          name: wordpress1
+        volumeMounts:
+        - name: aws-pv-wp1
+          mountPath: /var/lib/mysql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress2
+  labels:
+    app: wordpress2
+spec:
+  ports:
+    - port: 80
+      nodePort: 30000
+  selector: 
+    app: wordpress1
+  type: NodePort
+  
